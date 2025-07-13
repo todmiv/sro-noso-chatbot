@@ -16,31 +16,36 @@ _session_factory: sessionmaker = None
 _redis_client: aioredis.Redis = None
 
 
-async def wait_for_redis(timeout: int = 30) -> None:
-    """Ожидает доступности Redis."""
+async def wait_for_redis(timeout: int = None) -> aioredis.Redis:
+    """Ожидает подключения к Redis и возвращает клиент."""
+    timeout = timeout or config.redis.timeout
     redis_url = config.redis.url
-    deadline = time.monotonic() + timeout
     
-    logger.info(f"Waiting for Redis at {redis_url}...")
+    logger.info(f"Connecting to Redis at {redis_url}...")
     
-    while time.monotonic() < deadline:
+    client = aioredis.from_url(
+        redis_url,
+        encoding="utf8",
+        decode_responses=True,
+        socket_connect_timeout=timeout,
+        socket_timeout=timeout
+    )
+    
+    start_time = time.monotonic()
+    while True:
         try:
-            temp_client = aioredis.from_url(
-                redis_url, 
-                encoding="utf8", 
-                decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5
-            )
-            await temp_client.ping()
-            await temp_client.aclose()
-            logger.info("Redis is available")
-            return
+            await client.ping()
+            logger.info("Redis connection established")
+            return client
         except Exception as e:
+            if time.monotonic() - start_time > timeout:
+                await client.aclose()
+                raise RuntimeError(
+                    f"Could not connect to Redis at {redis_url} "
+                    f"after {timeout} seconds"
+                ) from e
             logger.debug(f"Redis connection attempt failed: {e}")
-            await asyncio.sleep(2)
-    
-    raise RuntimeError(f"Redis at {redis_url} is unreachable after {timeout}s")
+            await asyncio.sleep(0.5)
 
 
 async def init_redis() -> aioredis.Redis:
@@ -48,14 +53,7 @@ async def init_redis() -> aioredis.Redis:
     global _redis_client
     
     if _redis_client is None:
-        await wait_for_redis()
-        _redis_client = aioredis.from_url(
-            config.redis.url,
-            encoding="utf8",
-            decode_responses=True,
-            max_connections=20,
-            retry_on_timeout=True
-        )
+        _redis_client = await wait_for_redis()
         logger.info("Redis client initialized")
     
     return _redis_client

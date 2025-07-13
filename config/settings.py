@@ -9,6 +9,26 @@ from dotenv import load_dotenv
 load_dotenv()
 
 @dataclass
+class RedisConfig:
+    """Конфигурация Redis"""
+    url: str
+    timeout: int = 5
+    
+    @classmethod
+    def from_env(cls) -> 'RedisConfig':
+        return cls(
+            url=cls._get_required_env('REDIS_URL'),
+            timeout=int(os.getenv('REDIS_TIMEOUT', '5'))
+        )
+    
+    @staticmethod
+    def _get_required_env(key: str) -> str:
+        value = os.getenv(key)
+        if not value:
+            raise ValueError(f"Required environment variable {key} is not set")
+        return value
+
+@dataclass
 class DatabaseConfig:
     """Конфигурация базы данных"""
     url: str
@@ -115,6 +135,7 @@ class AppConfig:
     bot: BotConfig
     ai: AIConfig
     security: SecurityConfig
+    redis: RedisConfig
     
     @classmethod
     def load(cls) -> 'AppConfig':
@@ -129,7 +150,8 @@ class AppConfig:
             database=DatabaseConfig.from_env(),
             bot=BotConfig.from_env(),
             ai=AIConfig.from_env(),
-            security=SecurityConfig.from_env()
+            security=SecurityConfig.from_env(),
+            redis=RedisConfig.from_env()
         )
     
     @property
@@ -163,6 +185,10 @@ def validate_config():
     # Проверка секретных ключей
     if len(config.security.secret_key) < 32:
         errors.append("Secret key too short (minimum 32 characters)")
+        
+    # Проверка Redis
+    if not config.redis.url or not config.redis.url.startswith('redis://'):
+        errors.append("Invalid Redis URL")
     
     if errors:
         raise ValueError(f"Configuration validation failed: {', '.join(errors)}")
