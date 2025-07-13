@@ -1,105 +1,39 @@
-# Environment variables
-.env
-.env.*
-!.env.example
-*.env
-
-# Python specific
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
+egg-info/
 wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-env.bak/
-venv.bak/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-*.log
-logs/
-log/
-
-# Database
-*.db
-*.sqlite3
-db.sqlite3
-
-# Testing
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
 .coverage
 .pytest_cache/
-.tox/
-htmlcov/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
 
-# Documentation
-docs/_build/
-.sphinx/
+# Environments
+.venv/
+env/
+venv/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# IDE / editor folders
+.idea/
+.vscode/
 
-# Docker
-.dockerignore
+# Logs
+logs/
+*.log
 
-# Secrets and sensitive files
-secrets/
-certificates/
-*.pem
-*.key
-*.crt
-
-# Backup files
-*.bak
-*.backup
-*.tmp
-
-# Production specific
-docker-compose.override.yml
-.env.production
-
-# User uploads
-uploads/
-media/
-static/collected/
+# Local env files
+.env
+.env.* 
+!.env.example
