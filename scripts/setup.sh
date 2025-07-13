@@ -32,3 +32,4 @@ docker-compose build
 docker-compose up -d
 
 echo "Setup completed! Check the status with: docker-compose ps"
+
