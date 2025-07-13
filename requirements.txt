@@ -1,14 +1,34 @@
+# Telegram Bot Framework
 aiogram==3.4.1
-aiohttp==3.9.3
+
+# AI и ML
 openai==1.17.0
-pypdf==3.7.0
-pdfplumber==0.11.7         # зависит от pdfminer.six>=20250506
 sentence-transformers==2.6.1
 faiss-cpu==1.7.4
-redis==5.0.4
+
+# PDF обработка
+pypdf==3.7.0
+pdfplumber==0.11.7
+
+# База данных
 asyncpg==0.29.0
 sqlalchemy[asyncio]==2.0.30
 alembic==1.13.1
-prometheus-client==0.20.0
-structlog==24.1.0
+
+# Кэширование
+redis==5.0.4
+
+# Веб-фреймворк
+aiohttp==3.9.3
+
+# Утилиты
 python-dotenv==1.0.1
+structlog==24.1.0
+prometheus-client==0.20.0
+
+# HTTP клиент для DeepSeek API
+httpx==0.27.0
+
+# Безопасность
+passlib[bcrypt]==1.7.4
+cryptography==41.0.0
