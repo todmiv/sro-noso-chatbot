@@ -1,17 +1,21 @@
+"""Обновленный клиент DeepSeek с использованием нативного SDK."""
 from typing import List, Dict, Optional
-import openai
 import asyncio
 
 from config.settings import config
+from app.ai_integration.deepseek_sdk import DeepSeekClient as NativeDeepSeekClient, DeepSeekError
 
 
 class DeepSeekClient:
-    """Клиент для работы с DeepSeek API."""
+    """Обёртка над нативным DeepSeek клиентом для обратной совместимости."""
     
     def __init__(self):
-        self._client = openai.AsyncOpenAI(
+        self._client = NativeDeepSeekClient(
             api_key=config.ai.api_key,
-            base_url=config.ai.base_url
+            model=config.ai.model,
+            timeout=30,
+            max_retries=3,
+            cache_ttl=3600
         )
     
     async def chat_completion(
@@ -23,20 +27,15 @@ class DeepSeekClient:
     ) -> str:
         """Выполняет запрос к DeepSeek API."""
         try:
-            response = await self._client.chat.completions.create(
-                model=model or config.ai.model,
+            response = await self._client.chat_completion(
                 messages=messages,
+                model=model or config.ai.model,
                 max_tokens=max_tokens or config.ai.max_tokens,
                 temperature=temperature or config.ai.temperature
             )
+            return response.content
             
-            return response.choices[0].message.content
-            
-        except openai.RateLimitError:
-            await asyncio.sleep(1)  # Ждем и повторяем
-            return await self.chat_completion(messages, model, max_tokens, temperature)
-            
-        except Exception as e:
+        except DeepSeekError as e:
             raise Exception(f"DeepSeek API error: {e}")
     
     async def generate_response(
@@ -70,3 +69,7 @@ class DeepSeekClient:
         messages.append({"role": "user", "content": user_question})
         
         return await self.chat_completion(messages)
+    
+    async def close(self) -> None:
+        """Закрывает клиент."""
+        await self._client.close()
