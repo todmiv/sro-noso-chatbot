@@ -1,12 +1,14 @@
 aiogram==3.4.1
 aiohttp==3.9.3
-asyncpg==0.29.0
-python-dotenv==1.0.1
 openai==1.17.0
+pypdf==3.7.0
+pdfplumber==0.11.7         # зависит от pdfminer.six>=20250506
 sentence-transformers==2.6.1
 faiss-cpu==1.7.4
+redis==5.0.4
+asyncpg==0.29.0
 sqlalchemy[asyncio]==2.0.30
 alembic==1.13.1
-redis==5.0.4
 prometheus-client==0.20.0
 structlog==24.1.0
+python-dotenv==1.0.1
