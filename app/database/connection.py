@@ -2,6 +2,7 @@ import time
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 import redis.asyncio as aioredis
@@ -87,7 +88,7 @@ def get_session_factory() -> sessionmaker:
 
 
 @asynccontextmanager
-async def get_async_session() -> AsyncSession:
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     """Контекстный менеджер для получения асинхронной сессии."""
     session_factory = get_session_factory()
     async with session_factory() as session:
