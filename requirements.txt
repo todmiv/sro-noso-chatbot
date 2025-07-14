@@ -5,6 +5,7 @@ aiogram==3.4.1
 openai==1.17.0
 sentence-transformers==2.6.1
 faiss-cpu==1.7.4
+numpy<2.0  # Зафиксировано для совместимости с FAISS
 
 # PDF обработка
 pypdf==3.7.0
