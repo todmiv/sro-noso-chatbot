@@ -154,7 +154,7 @@ async def create_app() -> web.Application:
         logger.info(f"Webhook set to {config.bot.webhook_url}/webhook")
     
     # Добавление роутов для мониторинга
-    setup_health_check(app)
+    # setup_health_check(app)                                                   - временно отключено
     
     # Сохранение объектов в контексте приложения
     app['bot'] = bot
