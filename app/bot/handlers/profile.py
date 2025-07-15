@@ -14,7 +14,7 @@ class ProfileStates(StatesGroup):
     editing_contact = State()
 
 
-@router.message(Command("profile"))
+@router.message(Command(commands=['profile']))
 async def cmd_profile(message: types.Message, state: FSMContext) -> None:
     """Показывает профиль пользователя."""
     user_service = UserService()
