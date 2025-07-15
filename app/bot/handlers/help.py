@@ -1,9 +1,10 @@
 from aiogram import Router, types
+from aiogram.filters import Command
 
 router = Router()
 
 
-@router.message(commands={"help", "помощь"})
+@router.message(Command(commands=['help', 'помощь']))
 async def cmd_help(message: types.Message) -> None:
     """Отправляет список доступных команд."""
     help_text = (
