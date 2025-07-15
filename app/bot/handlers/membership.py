@@ -8,7 +8,7 @@ from app.bot.keyboards.inline_keyboards import get_membership_keyboard
 router = Router()
 
 
-@router.message(Command("membership"))
+@router.message(Command(commands=['membership']))
 async def cmd_membership(message: types.Message) -> None:
     """Показывает информацию о членстве в СРО."""
     user_service = UserService()
