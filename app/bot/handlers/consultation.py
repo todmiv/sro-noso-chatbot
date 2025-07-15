@@ -7,7 +7,7 @@ from app.services.document_service import DocumentService
 router = Router()
 
 
-@router.message(Command("question"))
+@router.message(Command(commands=['question']))
 async def cmd_question(message: types.Message) -> None:
     """Обработчик консультационных вопросов."""
     if not message.text or len(message.text.split()) < 2:
