@@ -102,7 +102,8 @@ async def start_polling():
         logger.info("Starting bot in polling mode...")
         
         # Удаление webhook если установлен
-        await bot.delete_webhook()
+        await bot.delete_webhook(drop_pending_updates=True)
+
         
         # Запуск polling в задаче для возможности отмены
         polling_task = asyncio.create_task(
