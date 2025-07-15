@@ -5,8 +5,7 @@ from app.services.document_service import DocumentService
 
 router = Router()
 
-
-@router.message(Command("documents"))
+@router.message(Command(commands=['documents']))
 async def cmd_documents(message: types.Message) -> None:
     """Показывает список доступных документов СРО."""
     document_service = DocumentService()
