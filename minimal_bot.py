@@ -16,6 +16,9 @@ async def main():
     # Создание бота и диспетчера
     bot = Bot(token=config.bot.token)
     dp = Dispatcher()
+
+    # ОБЯЗАТЕЛЬНО: удаляем web-hook, если он был установлен ранее
+    await bot.delete_webhook(drop_pending_updates=True)
     
     # Простой обработчик
     @dp.message(CommandStart())
