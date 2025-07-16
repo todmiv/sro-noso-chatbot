@@ -2,8 +2,23 @@ import logging
 import structlog
 from config.settings import config
 
+def _get_log_level(level_str: str) -> int:
+    """Convert string log level to logging constant."""
+    level_map = {
+        'DEBUG': logging.DEBUG,
+        'INFO': logging.INFO,
+        'WARNING': logging.WARNING,
+        'ERROR': logging.ERROR,
+        'CRITICAL': logging.CRITICAL
+    }
+    level = level_map.get(level_str.upper())
+    if level is None:
+        raise ValueError(f"Invalid log level: {level_str}")
+    return level
+
 def setup_logging() -> None:
-    logging.basicConfig(level=config.log_level)
+    log_level = _get_log_level(config.log_level)
+    logging.basicConfig(level=log_level)
     structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(config.log_level)
+        wrapper_class=structlog.make_filtering_bound_logger(log_level)
     )
