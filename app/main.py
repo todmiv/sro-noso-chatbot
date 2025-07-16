@@ -128,7 +128,7 @@ async def start_polling():
                 pass
         
     except Exception as e:
-        logger.error(f"Error in polling mode: {e}")
+        logger.error("Error in polling mode", exc_info=e)
         raise
     finally:
         await shutdown_sequence()
