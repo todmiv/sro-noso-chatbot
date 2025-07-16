@@ -11,6 +11,7 @@ REQUEST_COUNT = Counter(
 RESPONSE_TIME = Histogram(
     "bot_response_time_seconds", 
     "Time spent processing request",
+    ["event_type", "status"],           # ← добавлено имя лейбла
     registry=REGISTRY
 )
 
