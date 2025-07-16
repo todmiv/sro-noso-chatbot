@@ -44,3 +44,6 @@ class UserService:
         async with get_async_session() as session:
             user_repo = UserRepository(session)
             return await user_repo.get_by_telegram_id(telegram_id)
+
+    # Алиас для обратной совместимости
+    get_by_telegram_id = get_user_by_telegram_id
