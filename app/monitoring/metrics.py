@@ -5,7 +5,7 @@ from prometheus_client import REGISTRY
 REQUEST_COUNT = Counter(
     "bot_requests_total", 
     "Total requests to bot", 
-    ["status"],
+    ["event_type", "status"],  # Добавлен event_type
     registry=REGISTRY
 )
 RESPONSE_TIME = Histogram(

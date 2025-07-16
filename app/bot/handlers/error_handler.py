@@ -16,7 +16,7 @@ async def error_handler(event: ErrorEvent) -> None:
     logger.error(f"Update {event.update.update_id} caused error: {event.exception}")
     
     # Увеличиваем счетчик ошибок
-    REQUEST_COUNT.labels("error").inc()
+    REQUEST_COUNT.labels(event_type="error", status="error").inc()
     
     # Получаем информацию о пользователе
     user_info = None
@@ -56,7 +56,7 @@ async def error_handler(event: ErrorEvent) -> None:
 async def value_error_handler(event: ErrorEvent) -> None:
     """Обработчик ошибок валидации."""
     logger.warning(f"Validation error: {event.exception}")
-    REQUEST_COUNT.labels("validation_error").inc()
+    REQUEST_COUNT.labels(event_type="validation", status="error").inc()
     
     try:
         if hasattr(event.update, 'message') and event.update.message:
@@ -75,7 +75,7 @@ async def value_error_handler(event: ErrorEvent) -> None:
 async def permission_error_handler(event: ErrorEvent) -> None:
     """Обработчик ошибок доступа."""
     logger.warning(f"Permission error: {event.exception}")
-    REQUEST_COUNT.labels("permission_error").inc()
+    REQUEST_COUNT.labels(event_type="permission", status="error").inc()
     
     try:
         if hasattr(event.update, 'message') and event.update.message:
@@ -95,7 +95,7 @@ async def permission_error_handler(event: ErrorEvent) -> None:
 async def timeout_error_handler(event: ErrorEvent) -> None:
     """Обработчик ошибок таймаута."""
     logger.warning(f"Timeout error: {event.exception}")
-    REQUEST_COUNT.labels("timeout_error").inc()
+    REQUEST_COUNT.labels(event_type="timeout", status="error").inc()
     
     try:
         if hasattr(event.update, 'message') and event.update.message:
