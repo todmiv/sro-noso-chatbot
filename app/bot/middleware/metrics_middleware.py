@@ -50,8 +50,10 @@ class MetricsMiddleware(BaseMiddleware):
         finally:
             # Записываем время обработки
             processing_time = time.time() - start_time
+            status = "error" if 'e' in locals() else "success"
             RESPONSE_TIME.labels(
-                event_type=event_type
+                event_type=event_type,
+                status=status
             ).observe(processing_time)
     
     def _get_event_type(self, event: TelegramObject) -> str:
