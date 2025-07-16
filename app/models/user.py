@@ -1,5 +1,7 @@
-from sqlalchemy import Integer, String, Boolean, BigInteger
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import datetime
+from typing import List
+from sqlalchemy import Integer, String, Boolean, BigInteger, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 class User(Base):
@@ -11,3 +13,8 @@ class User(Base):
     first_name: Mapped[str | None] = mapped_column(String(255))
     last_name: Mapped[str | None] = mapped_column(String(255))
     is_member: Mapped[bool] = mapped_column(Boolean, default=False)
+    registration_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Связи
+    sessions: Mapped[List["Session"]] = relationship("Session", back_populates="user")
+    messages: Mapped[List["Message"]] = relationship("Message", back_populates="user")
