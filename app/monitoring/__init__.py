@@ -4,7 +4,7 @@ from .metrics import (
     RESPONSE_TIME,
     setup_metrics
 )
-from .health_check import health_check_handler            # , setup_health_check
+from .health_check import health_check_handler, setup_health_check
 from .alerts import AlertManager
 
 __all__ = [
@@ -12,6 +12,6 @@ __all__ = [
     "RESPONSE_TIME",
     "setup_metrics",
     "health_check_handler",
-    # "setup_health_check",                                 # Временно отключено
+    "setup_health_check",
     "AlertManager"
 ]
