@@ -65,11 +65,12 @@ def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
         _engine = create_async_engine(
-            config.database.url.replace("postgresql+asyncpg", "postgresql"),
+            config.database.url,
             pool_size=config.database.pool_size,
             max_overflow=config.database.max_overflow,
             pool_timeout=config.database.pool_timeout,
             echo=config.debug,
+            future=True,
             connect_args={
                 "server_settings": {
                     "application_name": "sro_chatbot"
