@@ -18,3 +18,4 @@ class User(Base):
     # Связи
     sessions: Mapped[List["Session"]] = relationship("Session", back_populates="user")
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="user")
+    feedback: Mapped[List["Feedback"]] = relationship("Feedback", back_populates="user")
