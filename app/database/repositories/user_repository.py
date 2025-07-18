@@ -20,3 +20,6 @@ class UserRepository:
     async def add(self, user: User) -> None:
         self._session.add(user)
         await self._session.commit()
+
+    async def update(self, user: User) -> None:
+        await self._session.commit()
