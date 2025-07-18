@@ -28,9 +28,16 @@ async def cmd_question(message: types.Message) -> None:
         
         # Поиск релевантных документов
         context = await document_service.search_relevant_content(question)
-        
+        if not context:
+            await typing_message.edit_text("📭 Не удалось найти релевантные документы.")
+            return
+            
         # Генерация ответа с помощью ИИ
-        response = await ai_service.generate_consultation_response(question, context)
+        response = await ai_service.generate_consultation_response(
+            user_question=question,
+            user_id=message.from_user.id,
+            context=context
+        )
         
         await typing_message.edit_text(response)
         
