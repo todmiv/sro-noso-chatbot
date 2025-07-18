@@ -36,7 +36,10 @@ class UserService:
                     last_name=last_name
                 )
             
-            await user_repo.save(user)
+            if user.id:  # Если пользователь существует
+                await user_repo.update(user)
+            else:  # Новый пользователь
+                await user_repo.add(user)
             return user
     
     async def get_user_by_telegram_id(self, telegram_id: int) -> Optional[User]:
