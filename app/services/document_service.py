@@ -1,4 +1,6 @@
 from typing import List, Optional
+import os
+from pathlib import Path
 
 from app.database.connection import get_async_session
 from app.database.repositories.document_repository import DocumentRepository
@@ -11,6 +13,7 @@ class DocumentService:
     
     def __init__(self):
         self.rag_system = RAGSystem()
+        self.documents_base_path = Path("data/documents")
     
     async def get_active_documents(self) -> List[Document]:
         """Возвращает список активных документов."""
@@ -38,3 +41,14 @@ class DocumentService:
         async with get_async_session() as session:
             doc_repo = DocumentRepository(session)
             return await doc_repo.get_by_id(doc_id)
+            
+    async def get_document_file(self, document: Document) -> Optional[Path]:
+        """Возвращает путь к файлу документа."""
+        if not document.file_path:
+            return None
+            
+        full_path = self.documents_base_path / document.file_path
+        if not full_path.exists():
+            return None
+            
+        return full_path
