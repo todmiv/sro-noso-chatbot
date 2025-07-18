@@ -64,21 +64,28 @@ def get_engine() -> AsyncEngine:
     """Возвращает экземпляр движка базы данных."""
     global _engine
     if _engine is None:
-        _engine = create_async_engine(
-            config.database.url,
-            pool_size=config.database.pool_size,
-            max_overflow=config.database.max_overflow,
-            pool_timeout=config.database.pool_timeout,
-            echo=config.debug,
-            future=True,
-            connect_args={
-                "server_settings": {
-                    "application_name": "sro_chatbot"
-                }
-            },
-            execution_options={"isolation_level": "AUTOCOMMIT"}
-        )
-        logger.info("Database engine initialized")
+        try:
+            _engine = create_async_engine(
+                config.database.url,
+                pool_size=config.database.pool_size,
+                max_overflow=config.database.max_overflow,
+                pool_timeout=config.database.pool_timeout,
+                echo=config.debug,
+                future=True,
+                connect_args={
+                    "server_settings": {
+                        "application_name": "sro_chatbot",
+                        "statement_timeout": "30000"  # 30 секунд
+                    }
+                },
+                pool_pre_ping=True,  # Проверка соединения перед использованием
+                pool_recycle=3600,   # Пересоздавать соединения каждый час
+                execution_options={"isolation_level": "AUTOCOMMIT"}
+            )
+            logger.info("Database engine initialized")
+        except Exception as e:
+            logger.error(f"Failed to create database engine: {e}")
+            raise
     return _engine
 
 
@@ -98,14 +105,18 @@ def get_session_factory() -> sessionmaker:
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     """Контекстный менеджер для получения асинхронной сессии."""
     session_factory = get_session_factory()
-    async with session_factory() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
+    session = None
+    try:
+        session = await session_factory().__aenter__()
+        yield session
+        await session.commit()
+    except Exception as e:
+        logger.error(f"Database session error: {e}")
+        if session:
             await session.rollback()
-            raise
-        finally:
+        raise
+    finally:
+        if session:
             await session.close()
 
 
