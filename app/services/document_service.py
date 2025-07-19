@@ -5,14 +5,14 @@ from pathlib import Path
 from app.database.connection import get_async_session
 from app.database.repositories.document_repository import DocumentRepository
 from app.models.document import Document
-from app.ai_integration.rag_system import RAGSystem
+from app.services.global_services import services
 
 
 class DocumentService:
     """Сервис для работы с документами СРО."""
     
     def __init__(self):
-        self.rag_system = RAGSystem()
+        self.rag_system = services.rag_system
         self.documents_base_path = Path("data/documents")
     
     async def get_active_documents(self) -> List[Document]:
@@ -33,7 +33,9 @@ class DocumentService:
             return context
             
         except Exception as e:
-            # Логируем ошибку
+            import traceback
+            print(f"[ERROR][DocumentService] Search failed: {str(e)}")
+            print(traceback.format_exc())
             return "Ошибка поиска в документах."
     
     async def get_document_by_id(self, doc_id: int) -> Optional[Document]:
