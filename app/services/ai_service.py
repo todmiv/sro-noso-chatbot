@@ -10,8 +10,9 @@ class AIService:
     """Сервис для работы с искусственным интеллектом."""
     
     def __init__(self):
+        from app.services.global_services import services
         self.deepseek_client = DeepSeekClient()
-        self.rag_system = RAGSystem()
+        self.rag_system = services.rag_system
         self.session_service = SessionService()
     
     async def generate_consultation_response(
@@ -33,19 +34,11 @@ class AIService:
                 # Формируем системный промпт
                 system_prompt = self._create_system_prompt()
                 
-                # Формируем сообщения для ИИ
-                messages = self._prepare_messages(
-                    user_question=user_question,
+                # Генерируем ответ через RAG систему
+                response = await self.rag_system.generate_response(
+                    question=user_question,
                     context=context,
-                    conversation_history=conversation_history,
-                    system_prompt=system_prompt
-                )
-                
-                # Генерируем ответ
-                response = await self.deepseek_client.generate_response(
-                    user_question=user_question,
-                    context=context,
-                    system_prompt=system_prompt
+                    user_id=user_id
                 )
                 
                 # Сохраняем в историю
@@ -59,15 +52,14 @@ class AIService:
                 return response
                 
             except Exception as e:
+                import traceback
+                print(f"[ERROR][AIService] Generation failed: {str(e)}")
+                print(traceback.format_exc())
                 return f"❌ Извините, произошла ошибка при обработке вашего запроса: {str(e)}"
     
     async def _get_document_context(self, question: str) -> str:
         """Получает релевантный контекст из документов."""
         try:
-            # Инициализируем RAG систему если необходимо
-            if not self.rag_system._initialized:
-                await self.rag_system.initialize()
-            
             # Ищем релевантные документы
             search_results = await self.rag_system.search(question, top_k=3)
             
@@ -82,6 +74,9 @@ class AIService:
             return "\n\n".join(context_parts)
             
         except Exception as e:
+            import traceback
+            print(f"[ERROR][AIService] Document context failed: {str(e)}")
+            print(traceback.format_exc())
             return ""
     
     def _create_system_prompt(self) -> str:
