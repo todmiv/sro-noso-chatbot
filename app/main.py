@@ -8,11 +8,14 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from aiogram import Bot, Dispatcher
+from aiogram.filters import Command
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 
 from config.settings import config
 from app.bot.bot_instance import create_bot, create_dispatcher
+from app.bot.handlers import register_handlers
+from app.bot.middleware import register_middleware
 from app.database.connection import (
     init_database, 
     init_redis, 
@@ -27,8 +30,25 @@ logger = logging.getLogger(__name__)
 
 # Глобальные переменные для graceful shutdown
 shutdown_event = asyncio.Event()
-bot: Bot = None
-dispatcher: Dispatcher = None
+
+from app.bot.bot_instance import create_bot, create_dispatcher
+from app.bot.handlers import register_handlers
+
+bot = create_bot()
+dispatcher = create_dispatcher()
+register_middleware(dispatcher)
+register_handlers(dispatcher)
+
+from aiogram import types
+
+@dispatcher.message(Command("test_callback"))
+async def cmd_test_callback(message: types.Message):
+    """Test command to generate callback test button."""
+    kb = types.InlineKeyboardMarkup(
+        inline_keyboard=[[types.InlineKeyboardButton(text="Test", callback_data="test_callback")]]
+    )
+    await message.answer("Test callback button:", reply_markup=kb)
+
 
 
 def signal_handler(signum, frame):
@@ -53,8 +73,7 @@ async def startup_sequence():
     await init_database()
     
     # 4. Создание бота и диспетчера
-    bot = create_bot()
-    dispatcher = create_dispatcher()
+    # bot и dispatcher уже созданы глобально и роутеры зарегистрированы
     
     # 5. Настройка мониторинга
     setup_metrics()
