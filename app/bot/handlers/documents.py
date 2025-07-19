@@ -53,26 +53,38 @@ async def cmd_documents(message: types.Message) -> None:
 @router.callback_query(F.data.startswith("doc_category:"))
 async def show_category_documents(callback: types.CallbackQuery):
     """Показывает документы выбранной категории."""
-    category = callback.data.split(":")[1]
-    document_service = DocumentService()
-    
-    documents = await document_service.get_active_documents()
-    category_docs = [doc for doc in documents if doc.category == category]
-    
-    if not category_docs:
-        await callback.answer("Нет документов в этой категории")
-        return
-    
-    builder = InlineKeyboardBuilder()
-    for doc in category_docs:
-        builder.button(text=doc.title, callback_data=f"doc_download:{doc.id}")
-    builder.adjust(1)
-    
-    await callback.message.edit_text(
-        f"📂 Документы категории <b>{category}</b>:",
-        reply_markup=builder.as_markup()
-    )
-    await callback.answer()
+    try:
+        await callback.answer("Обработка...")  # Проверка вызова
+        import logging
+        logger = logging.getLogger(__name__)
+        category = callback.data.split(":")[1]
+        print(f"[doc_category] callback: category={category}")
+        document_service = DocumentService()
+        
+        documents = await document_service.get_active_documents()
+        print(f"[doc_category] all_categories: {[doc.category for doc in documents]}")
+        logger.info(f"[doc_category] callback: category={category}, all_categories={[doc.category for doc in documents]}")
+        category_docs = [doc for doc in documents if doc.category == category]
+        
+        if not category_docs:
+            print(f"[doc_category] Нет документов в категории: {category}")
+            logger.warning(f"[doc_category] Нет документов в категории: {category}")
+            await callback.answer("Нет документов в этой категории")
+            return
+        
+        builder = InlineKeyboardBuilder()
+        for doc in category_docs:
+            builder.button(text=doc.title, callback_data=f"doc_download:{doc.id}")
+        builder.adjust(1)
+        
+        await callback.message.edit_text(
+            f"📂 Документы категории <b>{category}</b>:",
+            reply_markup=builder.as_markup()
+        )
+        await callback.answer()
+    except Exception as e:
+        print(f"[doc_category] Exception: {e}")
+        await callback.answer(f"Ошибка обработки категории: {e}")
 
 @router.callback_query(F.data.startswith("doc_download:"))
 async def download_document(callback: types.CallbackQuery):
