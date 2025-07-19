@@ -23,7 +23,7 @@ async def cmd_question(message: types.Message) -> None:
     typing_message = await message.answer("🤔 Ищу информацию...")
     
     try:
-        ai_service = AIService()
+        from app.services.global_services import services
         document_service = DocumentService()
         
         # Поиск релевантных документов
@@ -33,10 +33,10 @@ async def cmd_question(message: types.Message) -> None:
             return
             
         # Генерация ответа с помощью ИИ
-        response = await ai_service.generate_consultation_response(
-            user_question=question,
-            user_id=message.from_user.id,
-            context=context
+        response = await services.rag_system.generate_response(
+            question=question,
+            context=context,
+            user_id=message.from_user.id
         )
         
         await typing_message.edit_text(response)
