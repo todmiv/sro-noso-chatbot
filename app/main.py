@@ -75,7 +75,13 @@ async def startup_sequence():
     # 4. Создание бота и диспетчера
     # bot и dispatcher уже созданы глобально и роутеры зарегистрированы
     
-    # 5. Настройка мониторинга
+    # 5. Инициализация AI сервисов
+    from app.services.global_services import services
+    logger.info("Initializing AI services...")
+    _ = services.rag_system  # Инициализация RAG системы
+    logger.info("AI services initialized")
+    
+    # 6. Настройка мониторинга
     setup_metrics()
     
     logger.info("Startup sequence completed successfully")
