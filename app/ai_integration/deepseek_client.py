@@ -13,7 +13,7 @@ class DeepSeekClient:
         self._client = NativeDeepSeekClient(
             api_key=config.ai.api_key,
             model=config.ai.model,
-            timeout=30,
+            timeout=90,
             max_retries=3,
             cache_ttl=3600
         )
