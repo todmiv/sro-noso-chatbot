@@ -29,7 +29,7 @@ class GlobalServices:
         """Глобальное хранилище векторов."""
         if self._vector_store is None:
             dimension = self.embedding_service.get_embedding_dimension()
-            self._vector_store = VectorStore(dimension=dimension)
+            self._vector_store = VectorStore(self.embedding_service, dimension=dimension)
         return self._vector_store
 
     @property
