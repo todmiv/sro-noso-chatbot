@@ -5,22 +5,20 @@ import pickle
 import os
 from pathlib import Path
 
-from app.ai_integration.embeddings import EmbeddingService
+# Импортируем global_services внутри конструктора, чтобы избежать циклического импорта
 
 
 class VectorStore:
     """Векторное хранилище для поиска похожих документов."""
     
-    def __init__(self, dimension: int = 384, index_path: str = "data/vector_index"):
+    def __init__(self, embedding_service, dimension: int = 384, index_path: str = "data/vector_index"):
         self.dimension = dimension
         self.index_path = Path(index_path)
         self.index_path.mkdir(parents=True, exist_ok=True)
-        
-        self.embedding_service = EmbeddingService()
+        self.embedding_service = embedding_service
         self.index: Optional[faiss.Index] = None
         self.documents: List[Dict[str, Any]] = []
         self.metadata: List[Dict[str, Any]] = []
-        
         self._load_index()
     
     def _load_index(self) -> None:
