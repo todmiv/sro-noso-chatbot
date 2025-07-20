@@ -39,14 +39,37 @@ async def cmd_question(message: types.Message) -> None:
             user_id=message.from_user.id
         )
         
-        await typing_message.edit_text(response)
+        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="Задать новый вопрос", callback_data="new_question")],
+            [InlineKeyboardButton(text="Главное меню", callback_data="main_menu")],
+            [InlineKeyboardButton(text="Связаться с поддержкой", url="https://t.me/your_support_bot")]
+        ])
+        await typing_message.edit_text(response, reply_markup=menu_keyboard)
         
     except Exception as e:
+        print(f"[ERROR][consultation] {e}")
         await typing_message.edit_text(
             "❌ Произошла ошибка при обработке запроса. "
             "Попробуйте позже или обратитесь в службу поддержки."
         )
 
+
+from aiogram import F
+
+@router.callback_query(F.data == "new_question")
+async def handle_new_question(callback: types.CallbackQuery):
+    await callback.message.answer("Пожалуйста, введите ваш новый вопрос.")
+    await callback.answer()
+
+@router.callback_query(F.data == "main_menu")
+async def handle_main_menu(callback: types.CallbackQuery):
+    try:
+        from app.bot.keyboards.inline_keyboards import get_main_menu_keyboard
+        await callback.message.answer("Главное меню:", reply_markup=get_main_menu_keyboard())
+    except Exception:
+        await callback.message.answer("Главное меню. Выберите действие.")
+    await callback.answer()
 
 @router.message()
 async def handle_free_text(message: types.Message) -> None:
