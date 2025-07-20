@@ -25,7 +25,26 @@ class DocumentProcessor:
                 doc = docx.Document(file_path)
                 return "\n".join([p.text for p in doc.paragraphs])
             else:
-                raise ValueError("DOC format requires additional dependencies")
+                try:
+                    import textract
+                except ImportError as e:
+                    raise ImportError(
+                        "Для обработки .doc файлов требуется установить пакет textract. "
+                        "Установите его командой: pip install textract. "
+                        f"Ошибка импорта: {e}"
+                    )
+                try:
+                    text = textract.process(str(file_path)).decode('utf-8')
+                    return text
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Ошибка обработки .doc файла {file_path}: {e}. "
+                        "Убедитесь, что textract и все его системные зависимости установлены."
+                    )
+        
+        elif suffix == '.txt':
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
                 
         else:
             raise ValueError(f"Unsupported file format: {suffix}")
