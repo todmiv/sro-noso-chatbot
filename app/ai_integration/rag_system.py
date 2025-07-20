@@ -88,32 +88,31 @@ class RAGSystem:
         except Exception as e:
             raise Exception(f"Failed to add document {file_path}: {e}")
     
-    # В app/ai_integration/rag_system.py добавить метод:
-async def generate_response(
-    self, 
-    question: str, 
-    context: str = None, 
-    user_id: int = None
-) -> str:
-    """Генерирует ответ используя RAG + DeepSeek."""
-    from app.ai_integration.deepseek_client import DeepSeekClient
-    
-    # Получаем контекст из документов если не передан
-    if not context:
-        search_results = await self.search(question, top_k=3)
-        context = "\n\n".join([result.get("content", "") for result in search_results])
-    
-    # Создаем клиента DeepSeek
-    deepseek_client = DeepSeekClient()
-    
-    try:
-        response = await deepseek_client.generate_response(
-            user_question=question,
-            context=context
-        )
-        return response
-    finally:
-        await deepseek_client.close()
+    async def generate_response(
+        self, 
+        question: str, 
+        context: str = None, 
+        user_id: int = None
+    ) -> str:
+        """Генерирует ответ используя RAG + DeepSeek."""
+        from app.ai_integration.deepseek_client import DeepSeekClient
+        
+        # Получаем контекст из документов если не передан
+        if not context:
+            search_results = await self.search(question, top_k=3)
+            context = "\n\n".join([result.get("content", "") for result in search_results])
+        
+        # Создаем клиента DeepSeek
+        deepseek_client = DeepSeekClient()
+        
+        try:
+            response = await deepseek_client.generate_response(
+                user_question=question,
+                context=context
+            )
+            return response
+        finally:
+            await deepseek_client.close()
 
 # Глобальный экземпляр RAG системы
 from app.services.global_services import services
