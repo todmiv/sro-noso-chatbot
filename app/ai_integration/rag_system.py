@@ -4,19 +4,19 @@ from pathlib import Path
 
 from app.ai_integration.document_processor import DocumentProcessor
 from app.ai_integration.vector_store import VectorStore
+from app.ai_integration.embeddings import EmbeddingService
 
 
 class RAGSystem:
     """Система Retrieval-Augmented Generation для поиска в документах."""
     
     def __init__(self, embedding_service=None, vector_store=None):
-        from app.ai_integration.embeddings import EmbeddingService
-        from app.ai_integration.vector_store import VectorStore
         
         self.document_processor = DocumentProcessor()
         self.vector_store = vector_store or VectorStore(
             dimension=embedding_service.get_embedding_dimension() if embedding_service else 384
         )
+        self.embedding_service = embedding_service
         self._initialized = False
     
     async def initialize(self, documents_path: str = "data/documents/") -> None:
@@ -55,7 +55,10 @@ class RAGSystem:
                     await self.vector_store.add_documents(chunks, source=str(doc_file))
                     
                 except Exception as e:
-                    print(f"Error processing {doc_file}: {e}")
+                    print(f"Ошибка обработки {doc_file}: {e}")
+                    if 'textract' in str(e) or 'additional dependencies' in str(e):
+                        print("Рекомендация: Для обработки .doc файлов установите пакет textract командой: pip install textract. "
+                              "Также могут потребоваться системные зависимости, см. https://textract.readthedocs.io/en/stable/installation.html")
         
         self._initialized = True
     
@@ -84,6 +87,33 @@ class RAGSystem:
             await self.vector_store.add_documents(chunks, source=file_path)
         except Exception as e:
             raise Exception(f"Failed to add document {file_path}: {e}")
+    
+    # В app/ai_integration/rag_system.py добавить метод:
+async def generate_response(
+    self, 
+    question: str, 
+    context: str = None, 
+    user_id: int = None
+) -> str:
+    """Генерирует ответ используя RAG + DeepSeek."""
+    from app.ai_integration.deepseek_client import DeepSeekClient
+    
+    # Получаем контекст из документов если не передан
+    if not context:
+        search_results = await self.search(question, top_k=3)
+        context = "\n\n".join([result.get("content", "") for result in search_results])
+    
+    # Создаем клиента DeepSeek
+    deepseek_client = DeepSeekClient()
+    
+    try:
+        response = await deepseek_client.generate_response(
+            user_question=question,
+            context=context
+        )
+        return response
+    finally:
+        await deepseek_client.close()
 
 # Глобальный экземпляр RAG системы
 from app.services.global_services import services
