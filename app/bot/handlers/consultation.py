@@ -71,7 +71,7 @@ async def handle_main_menu(callback: types.CallbackQuery):
         await callback.message.answer("Главное меню. Выберите действие.")
     await callback.answer()
 
-@router.message()
+@router.message(lambda message: not (message.text and message.text.startswith('/')))
 async def handle_free_text(message: types.Message) -> None:
     """Обработчик свободного текста как консультационного вопроса."""
     if message.text and len(message.text) > 10:

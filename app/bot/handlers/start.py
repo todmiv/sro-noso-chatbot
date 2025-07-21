@@ -9,6 +9,7 @@ router = Router()
 @router.message(CommandStart())
 async def cmd_start(message: types.Message) -> None:
     """Обработчик команды /start."""
+    print(f"/start called by user: {message.from_user.id}, username: {message.from_user.username}")
     user_service = UserService()
     
     # Регистрируем или обновляем пользователя
@@ -18,6 +19,7 @@ async def cmd_start(message: types.Message) -> None:
         first_name=message.from_user.first_name,
         last_name=message.from_user.last_name
     )
+    print(f"register_or_update_user finished for user: {message.from_user.id}")
     
     welcome_text = (
         "👋 Добро пожаловать в чат-бот СРО НОСО!\n\n"

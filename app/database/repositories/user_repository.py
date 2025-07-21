@@ -23,3 +23,8 @@ class UserRepository:
 
     async def update(self, user: User) -> None:
         await self._session.commit()
+
+    async def get_all_users(self) -> list[User]:
+        stmt = select(User)
+        result = await self._session.execute(stmt)
+        return result.scalars().all()

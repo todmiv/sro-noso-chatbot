@@ -18,15 +18,16 @@ class UserService:
         """Регистрирует нового пользователя или обновляет существующего."""
         async with get_async_session() as session:
             user_repo = UserRepository(session)
-            
+            print(f"[register_or_update_user] called for telegram_id={telegram_id}")
             # Ищем существующего пользователя
             user = await user_repo.get_by_telegram_id(telegram_id)
-            
+            print(f"[register_or_update_user] user found: {user is not None}")
             if user:
                 # Обновляем данные
                 user.username = username
                 user.first_name = first_name
                 user.last_name = last_name
+                print(f"[register_or_update_user] updating user {telegram_id}")
             else:
                 # Создаем нового
                 user = User(
@@ -35,11 +36,13 @@ class UserService:
                     first_name=first_name,
                     last_name=last_name
                 )
-            
+                print(f"[register_or_update_user] creating new user {telegram_id}")
             if user.id:  # Если пользователь существует
                 await user_repo.update(user)
+                print(f"[register_or_update_user] user updated {telegram_id}")
             else:  # Новый пользователь
                 await user_repo.add(user)
+                print(f"[register_or_update_user] user added {telegram_id}")
             return user
     
     async def get_user_by_telegram_id(self, telegram_id: int) -> Optional[User]:
@@ -50,3 +53,9 @@ class UserService:
 
     # Алиас для обратной совместимости
     get_by_telegram_id = get_user_by_telegram_id
+
+    async def get_all_users(self) -> list[User]:
+        """Возвращает всех пользователей."""
+        async with get_async_session() as session:
+            user_repo = UserRepository(session)
+            return await user_repo.get_all_users()
