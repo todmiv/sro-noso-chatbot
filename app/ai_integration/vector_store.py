@@ -2,7 +2,6 @@ from typing import List, Dict, Optional, Any
 import numpy as np
 import faiss
 import pickle
-import os
 from pathlib import Path
 
 # Импортируем global_services внутри конструктора, чтобы избежать циклического импорта

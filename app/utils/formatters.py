@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Union
-import locale
 
 
 def format_datetime(dt: Optional[datetime], format_str: str = "%d.%m.%Y %H:%M") -> str:

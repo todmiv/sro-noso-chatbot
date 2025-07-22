@@ -5,7 +5,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import logging
 
 from app.services.document_service import DocumentService
-from app.models.document import Document
 from app.database.connection import get_async_session
 from app.database.repositories.document_repository import DocumentRepository
 

@@ -82,7 +82,7 @@ async def test_database():
     except Exception as e:
         print(f"\n[ERROR] Критическая ошибка: {type(e).__name__}: {e}")
     finally:
-        print(f"\n=== Тестирование завершено ===")
+        print("\n=== Тестирование завершено ===")
         print(f"Время окончания: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":

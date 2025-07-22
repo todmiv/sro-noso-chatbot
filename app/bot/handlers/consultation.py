@@ -1,7 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 
-from app.services.ai_service import AIService
 from app.services.document_service import DocumentService
 
 router = Router()

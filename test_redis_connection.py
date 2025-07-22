@@ -1,5 +1,5 @@
 import asyncio
-from app.database.connection import init_redis, get_redis, close_redis
+from app.database.connection import init_redis, close_redis
 from config.settings import config
 
 async def test_redis_connection():

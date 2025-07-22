@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from pathlib import Path
 
 # Настройка логирования
 logging.basicConfig(

@@ -1,5 +1,4 @@
 from typing import List, Optional
-import os
 from pathlib import Path
 
 from app.database.connection import get_async_session

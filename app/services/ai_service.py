@@ -1,7 +1,5 @@
 from typing import List, Dict, Optional
-import asyncio
 from app.ai_integration.deepseek_client import DeepSeekClient
-from app.ai_integration.rag_system import RAGSystem
 from app.services.session_service import SessionService
 from app.monitoring.metrics import RESPONSE_TIME
 
@@ -29,10 +27,10 @@ class AIService:
                     context = await self._get_document_context(user_question)
                 
                 # Получаем историю диалога
-                conversation_history = await self.session_service.get_conversation_history(user_id)
+                await self.session_service.get_conversation_history(user_id)
                 
                 # Формируем системный промпт
-                system_prompt = self._create_system_prompt()
+                self._create_system_prompt()
                 
                 # Генерируем ответ через RAG систему
                 response = await self.rag_system.generate_response(

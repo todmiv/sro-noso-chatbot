@@ -7,9 +7,8 @@ from pathlib import Path
 # Добавляем путь к проекту
 sys.path.append(str(Path(__file__).parent.parent))
 
-from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler
 from aiohttp import web
 
 from config.settings import config
@@ -23,7 +22,6 @@ from app.database.connection import (
     close_redis
 )
 from app.utils.logging_config import setup_logging
-from app.monitoring.health_check import setup_health_check
 from app.monitoring.metrics import setup_metrics
 
 logger = logging.getLogger(__name__)
@@ -31,8 +29,6 @@ logger = logging.getLogger(__name__)
 # Глобальные переменные для graceful shutdown
 shutdown_event = asyncio.Event()
 
-from app.bot.bot_instance import create_bot, create_dispatcher
-from app.bot.handlers import register_handlers
 
 bot = create_bot()
 dispatcher = create_dispatcher()

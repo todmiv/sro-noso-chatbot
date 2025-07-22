@@ -1,6 +1,5 @@
 """Обновленный клиент DeepSeek с использованием нативного SDK."""
 from typing import List, Dict, Optional
-import asyncio
 
 from config.settings import config
 from app.ai_integration.deepseek_sdk import DeepSeekClient as NativeDeepSeekClient, DeepSeekError

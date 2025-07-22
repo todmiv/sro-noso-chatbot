@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from typing import List, Optional
+from typing import List
 
 
 def get_main_menu_keyboard(is_member: bool = False) -> InlineKeyboardMarkup:

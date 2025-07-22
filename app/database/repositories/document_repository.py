@@ -35,7 +35,7 @@ class DocumentRepository:
         """Получает активные документы."""
         stmt = (
             select(Document)
-            .where(Document.is_active == True)
+            .where(Document.is_active)
             .order_by(desc(Document.last_updated))
             .limit(limit)
         )
@@ -48,8 +48,8 @@ class DocumentRepository:
             select(Document)
             .where(
                 and_(
-                    Document.is_active == True,
-                    Document.is_public == True
+                    Document.is_active,
+                    Document.is_public
                 )
             )
             .order_by(desc(Document.last_updated))
@@ -65,7 +65,7 @@ class DocumentRepository:
             .where(
                 and_(
                     Document.document_type == document_type,
-                    Document.is_active == True
+                    Document.is_active
                 )
             )
             .order_by(desc(Document.last_updated))
@@ -81,7 +81,7 @@ class DocumentRepository:
             .where(
                 and_(
                     Document.category == category,
-                    Document.is_active == True
+                    Document.is_active
                 )
             )
             .order_by(desc(Document.last_updated))
@@ -96,7 +96,7 @@ class DocumentRepository:
             select(Document)
             .where(
                 and_(
-                    Document.is_active == True,
+                    Document.is_active,
                     or_(
                         Document.title.ilike(f"%{query}%"),
                         Document.description.ilike(f"%{query}%"),
@@ -114,7 +114,7 @@ class DocumentRepository:
         """Получает список типов документов."""
         stmt = (
             select(Document.document_type)
-            .where(Document.is_active == True)
+            .where(Document.is_active)
             .distinct()
         )
         result = await self._session.execute(stmt)
@@ -126,7 +126,7 @@ class DocumentRepository:
             select(Document.category)
             .where(
                 and_(
-                    Document.is_active == True,
+                    Document.is_active,
                     Document.category.is_not(None)
                 )
             )
@@ -146,7 +146,7 @@ class DocumentRepository:
         """Получает популярные документы."""
         stmt = (
             select(Document)
-            .where(Document.is_active == True)
+            .where(Document.is_active)
             .order_by(desc(Document.download_count))
             .limit(limit)
         )
@@ -157,7 +157,7 @@ class DocumentRepository:
         """Получает недавно добавленные документы."""
         stmt = (
             select(Document)
-            .where(Document.is_active == True)
+            .where(Document.is_active)
             .order_by(desc(Document.upload_date))
             .limit(limit)
         )
@@ -166,7 +166,7 @@ class DocumentRepository:
     
     async def count_documents(self) -> int:
         """Подсчитывает общее количество активных документов."""
-        stmt = select(func.count(Document.id)).where(Document.is_active == True)
+        stmt = select(func.count(Document.id)).where(Document.is_active)
         result = await self._session.execute(stmt)
         return result.scalar() or 0
     

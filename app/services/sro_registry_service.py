@@ -1,9 +1,6 @@
 from typing import Optional, Dict, List
 import aiohttp
-import asyncio
-from datetime import datetime
 
-from config.settings import config
 
 
 class SRORegistryService:
@@ -34,12 +31,12 @@ class SRORegistryService:
                     result = await check_func(organization_name)
                     if result:
                         return result
-                except Exception as e:
+                except Exception:
                     continue
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def _check_nostroy_registry(self, organization_name: str) -> Optional[Dict]:
@@ -72,7 +69,7 @@ class SRORegistryService:
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def _check_nopriz_registry(self, organization_name: str) -> Optional[Dict]:
@@ -104,7 +101,7 @@ class SRORegistryService:
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def _check_federal_registry(self, organization_name: str) -> Optional[Dict]:
@@ -136,7 +133,7 @@ class SRORegistryService:
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def get_organization_by_inn(self, inn: str) -> Optional[Dict]:
@@ -155,7 +152,7 @@ class SRORegistryService:
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def get_sro_members_list(self, sro_name: str) -> List[Dict]:
@@ -173,7 +170,7 @@ class SRORegistryService:
             
             return []
             
-        except Exception as e:
+        except Exception:
             return []
     
     async def verify_specialist_certificate(self, specialist_id: str) -> Optional[Dict]:
@@ -198,7 +195,7 @@ class SRORegistryService:
             
             return None
             
-        except Exception as e:
+        except Exception:
             return None
     
     async def close(self) -> None:

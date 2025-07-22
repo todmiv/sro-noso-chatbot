@@ -38,7 +38,7 @@ class SessionRepository:
             .where(
                 and_(
                     Session.user_id == user_id,
-                    Session.is_active == True
+                    Session.is_active
                 )
             )
             .order_by(desc(Session.last_activity))
@@ -86,7 +86,7 @@ class SessionRepository:
     
     async def count_active_sessions(self) -> int:
         """Подсчитывает количество активных сессий."""
-        stmt = select(func.count(Session.id)).where(Session.is_active == True)
+        stmt = select(func.count(Session.id)).where(Session.is_active)
         result = await self._session.execute(stmt)
         return result.scalar() or 0
     
@@ -132,7 +132,7 @@ class SessionRepository:
             select(Session)
             .where(
                 and_(
-                    Session.is_active == True,
+                    Session.is_active,
                     Session.last_activity < cutoff_time
                 )
             )

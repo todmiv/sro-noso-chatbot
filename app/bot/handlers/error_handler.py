@@ -1,5 +1,5 @@
 import logging
-from aiogram import Router, types
+from aiogram import Router
 from aiogram.filters import ExceptionTypeFilter
 from aiogram.types import ErrorEvent
 

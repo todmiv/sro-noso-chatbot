@@ -1,9 +1,6 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from app.models.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -13,13 +10,6 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-from app.models.base import Base
-from app.models.user import User
-from app.models.message import Message
-from app.models.session import Session
-from app.models.document import Document
-from app.models.feedback import Feedback
 
 target_metadata = Base.metadata
 
@@ -56,7 +46,6 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode with async support."""
     from sqlalchemy.ext.asyncio import create_async_engine
-    from sqlalchemy.ext.asyncio import AsyncConnection
     from dotenv import load_dotenv
     import asyncio
     import os

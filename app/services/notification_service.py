@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 import asyncio
 from aiogram import Bot
 from datetime import datetime, timedelta

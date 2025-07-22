@@ -44,3 +44,6 @@ class GlobalServices:
 
 # Глобальный экземпляр сервисов
 services = GlobalServices()
+
+# Инициализация RAG системы после создания сервисов
+services.rag_system

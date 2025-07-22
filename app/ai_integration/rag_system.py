@@ -1,10 +1,9 @@
-from typing import List, Dict, Optional
-import os
+from typing import List, Dict
 from pathlib import Path
+import traceback
 
 from app.ai_integration.document_processor import DocumentProcessor
 from app.ai_integration.vector_store import VectorStore
-from app.ai_integration.embeddings import EmbeddingService
 
 
 class RAGSystem:
@@ -113,10 +112,3 @@ class RAGSystem:
             return response
         finally:
             await deepseek_client.close()
-
-# Глобальный экземпляр RAG системы
-from app.services.global_services import services
-rag_system_instance = RAGSystem(
-    embedding_service=services.embedding_service,
-    vector_store=services.vector_store
-)

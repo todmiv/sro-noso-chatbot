@@ -1,6 +1,5 @@
 """Добавление индексов для оптимизации производительности."""
 from alembic import op
-import sqlalchemy as sa
 
 revision = "003_add_indexing"
 down_revision = "002_add_feedback"

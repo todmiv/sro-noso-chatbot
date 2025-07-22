@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Float
+from sqlalchemy import Integer, Text, DateTime, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
+from .session import Session
+from .user import User
 
 
 class Message(Base):

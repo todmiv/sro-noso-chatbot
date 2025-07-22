@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Optional
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import torch

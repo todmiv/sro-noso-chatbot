@@ -1,9 +1,14 @@
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy import Integer, String, DateTime, Boolean, JSON, ForeignKey
+from typing import List, Optional
+from sqlalchemy import Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import JSON
 
 from .base import Base
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .user import User
+    from .message import Message
 
 
 class Session(Base):

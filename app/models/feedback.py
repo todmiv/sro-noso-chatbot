@@ -4,6 +4,8 @@ from sqlalchemy import Integer, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
+from .user import User
+from .message import Message
 
 
 class Feedback(Base):
