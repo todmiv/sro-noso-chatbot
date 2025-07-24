@@ -1,5 +1,6 @@
 from typing import Optional, Dict, List
 import aiohttp
+from bs4 import BeautifulSoup
 
 
 
@@ -18,9 +19,11 @@ class SRORegistryService:
     
     async def check_membership_status(self, organization_name: str) -> Optional[Dict]:
         """Проверяет статус членства организации в реестре СРО."""
+        print(f"[SRORegistryService] Checking membership for: {organization_name}")
         try:
             # Пытаемся найти в разных реестрах
             registries = [
+                self._check_noso_registry,  # Проверяем сначала СРО НОСО
                 self._check_nostroy_registry,
                 self._check_nopriz_registry,
                 self._check_federal_registry
@@ -28,15 +31,20 @@ class SRORegistryService:
             
             for check_func in registries:
                 try:
+                    print(f"[SRORegistryService] Trying registry: {check_func.__name__}")
                     result = await check_func(organization_name)
                     if result:
+                        print(f"[SRORegistryService] Found in registry: {result.get('registry')}")
                         return result
-                except Exception:
+                except Exception as e:
+                    print(f"[SRORegistryService] Error checking {check_func.__name__}: {str(e)}")
                     continue
             
+            print("[SRORegistryService] Organization not found in any registry")
             return None
             
-        except Exception:
+        except Exception as e:
+            print(f"[SRORegistryService] Critical error: {str(e)}")
             return None
     
     async def _check_nostroy_registry(self, organization_name: str) -> Optional[Dict]:
@@ -131,6 +139,67 @@ class SRORegistryService:
                             "registry_url": "https://reestr.gosstroy.gov.ru"
                         }
             
+            return None
+            
+        except Exception:
+            return None
+
+    async def _check_noso_registry(self, organization_name: str, inn: str = "") -> Optional[Dict]:
+        """Проверяет в реестре СРО НОСО."""
+        print(f"[_check_noso_registry] Checking {organization_name} (INN: {inn})")
+        try:
+            session = await self._get_session()
+            base_url = "https://www.sronoso.ru/reestr/"
+            
+            params = {
+                "PAGEN_1": 1,
+                "arrFilter_ff[NAME]": organization_name,
+                "arrFilter_pf[STATUS]": "",
+                "arrFilter_pf[INNNumber]": inn,
+                "set_filter": "Y"
+            }
+            
+            async with session.get(base_url, params=params) as response:
+                if response.status != 200:
+                    print(f"[_check_noso_registry] HTTP error: {response.status}")
+                    return None
+                
+                html = await response.text()
+                soup = BeautifulSoup(html, "html.parser")
+                table = soup.find('table', {'class': 'table table-bordered table-striped'})
+                
+                if not table:
+                    print("[_check_noso_registry] No results table found")
+                    return None
+                    
+                rows = table.find_all('tr')
+                if len(rows) <= 1:  # Только заголовки
+                    print("[_check_noso_registry] No results in table")
+                    return None
+                    
+                # Ищем точное совпадение по названию организации
+                for row in rows[1:]:  # Пропускаем заголовок
+                    cols = row.find_all('td')
+                    if len(cols) >= 4:
+                        org_name = cols[1].text.strip()
+                        status = cols[0].text.strip()
+                        org_inn = cols[2].text.strip()
+                        join_date = cols[3].text.strip()
+                        
+                        print(f"[_check_noso_registry] Found: {org_name} ({org_inn})")
+                        
+                        if organization_name.lower() == org_name.lower():
+                            return {
+                                "registry": "СРО НОСО",
+                                "name": org_name,
+                                "inn": org_inn,
+                                "status": status,
+                                "join_date": join_date,
+                                "sro_name": "СРО НОСО",
+                                "registry_url": response.url.human_repr()
+                            }
+            
+            print("[_check_noso_registry] No exact match found")
             return None
             
         except Exception:
