@@ -11,6 +11,10 @@ router = Router()
 @router.message(Command(commands=['membership']))
 async def cmd_membership(message: types.Message) -> None:
     """Показывает информацию о членстве в СРО."""
+    print(f"[cmd_membership] Received command from {message.from_user.id}")
+    print(f"Raw text: '{message.text}'")
+    print(f"Entities: {message.entities}")
+    
     user_service = UserService()
     user = await user_service.get_user_by_telegram_id(message.from_user.id)
     
