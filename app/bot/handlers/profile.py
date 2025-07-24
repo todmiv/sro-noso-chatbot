@@ -31,7 +31,7 @@ async def cmd_profile(message: types.Message, state: FSMContext) -> None:
         f"**Имя:** {user.first_name or 'Не указано'}\n"
         f"**Фамилия:** {user.last_name or 'Не указано'}\n"
         f"**Username:** @{user.username or 'Не указано'}\n"
-        f"**Организация:** {user.organization_name or 'Не указано'}\n"
+        f"**Организация:** `{user.organization_name or 'Не указано'}`\n"
         f"**Статус членства:** {'✅ Член СРО' if user.is_member else '❌ Не является членом'}\n"
         f"**Дата регистрации:** {user.registration_date.strftime('%d.%m.%Y') if user.registration_date else 'Не указано'}"
     )
@@ -56,14 +56,45 @@ async def edit_organization(callback: types.CallbackQuery, state: FSMContext) ->
 @router.message(ProfileStates.editing_organization)
 async def save_organization(message: types.Message, state: FSMContext) -> None:
     """Сохраняет новое название организации."""
+    current_state = await state.get_state()
+    print(f"[save_organization] State: {current_state}, Received text: '{message.text}'")
+    
+    if not message.text or message.text.strip() == "":
+        await message.answer("❌ Название организации не может быть пустым.")
+        return
+        
+    if message.text.startswith('/'):
+        print(f"[save_organization] Rejected command: {message.text}")
+        await message.answer("❌ Пожалуйста, введите название организации, а не команду.")
+        return
+        
     if len(message.text) > 200:
         await message.answer("❌ Название организации слишком длинное (максимум 200 символов).")
         return
     
-    user_service = UserService()
-    await user_service.update_organization(message.from_user.id, message.text)
+    org_name = message.text.strip()
+    print(f"[save_organization] Processing organization: '{org_name}'")
+    print(f"[save_organization] Processing organization: '{org_name}'")  # Логируем обработанное значение
     
-    await message.answer(f"✅ Организация обновлена: {message.text}")
+    user_service = UserService()
+    await user_service.register_or_update_user(
+        telegram_id=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+        organization_name=org_name
+    )
+    
+    print(f"[save_organization] Updated organization to: '{org_name}'")  # Логируем результат
+    await message.answer(
+        f"📝 Наименование организации изменено на: `{org_name}`",
+        reply_markup=types.InlineKeyboardMarkup(
+            inline_keyboard=[
+                [types.InlineKeyboardButton(text="⬅️ Назад", callback_data="profile")]
+            ]
+        ),
+        parse_mode="Markdown"
+    )
     await state.clear()
 
 
@@ -90,7 +121,7 @@ async def refresh_profile(callback: types.CallbackQuery) -> None:
         f"**Имя:** {user.first_name or 'Не указано'}\n"
         f"**Фамилия:** {user.last_name or 'Не указано'}\n"
         f"**Username:** @{user.username or 'Не указано'}\n"
-        f"**Организация:** {user.organization_name or 'Не указано'}\n"
+        f"**Организация:** `{user.organization_name or 'Не указано'}`\n"
         f"**Статус членства:** {'✅ Член СРО' if user.is_member else '❌ Не является членом'}\n"
         f"**Дата регистрации:** {user.registration_date.strftime('%d.%m.%Y') if user.registration_date else 'Не указано'}"
     )
