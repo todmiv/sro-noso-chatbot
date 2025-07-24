@@ -13,7 +13,8 @@ class UserService:
         telegram_id: int,
         username: Optional[str] = None,
         first_name: Optional[str] = None,
-        last_name: Optional[str] = None
+        last_name: Optional[str] = None,
+        organization_name: Optional[str] = None
     ) -> User:
         """Регистрирует нового пользователя или обновляет существующего."""
         async with get_async_session() as session:
@@ -27,6 +28,9 @@ class UserService:
                 user.username = username
                 user.first_name = first_name
                 user.last_name = last_name
+                if organization_name is not None:
+                    print(f"[register_or_update_user] updating organization for {telegram_id} from '{user.organization_name}' to '{organization_name}'")
+                    user.organization_name = organization_name
                 print(f"[register_or_update_user] updating user {telegram_id}")
             else:
                 # Создаем нового
@@ -34,9 +38,10 @@ class UserService:
                     telegram_id=telegram_id,
                     username=username,
                     first_name=first_name,
-                    last_name=last_name
+                    last_name=last_name,
+                    organization_name=organization_name
                 )
-                print(f"[register_or_update_user] creating new user {telegram_id}")
+                print(f"[register_or_update_user] creating new user {telegram_id} with organization: '{organization_name}'")
             if user.id:  # Если пользователь существует
                 await user_repo.update(user)
                 print(f"[register_or_update_user] user updated {telegram_id}")
