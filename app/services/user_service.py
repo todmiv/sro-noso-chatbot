@@ -28,11 +28,20 @@ class UserService:
                 user.username = username
                 user.first_name = first_name
                 user.last_name = last_name
+                # Обновляем все поля
+                if username is not None:
+                    user.username = username
+                if first_name is not None:
+                    user.first_name = first_name
+                if last_name is not None:
+                    user.last_name = last_name
                 if organization_name is not None:
                     print(f"[register_or_update_user] updating organization for {telegram_id} from '{user.organization_name}' to '{organization_name}'")
                     user.organization_name = organization_name
-                    await session.commit()
+                
                 print(f"[register_or_update_user] updating user {telegram_id}")
+                await session.commit()
+                await session.refresh(user)
             else:
                 # Создаем нового
                 user = User(
