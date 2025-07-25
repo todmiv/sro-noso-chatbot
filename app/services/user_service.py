@@ -31,6 +31,7 @@ class UserService:
                 if organization_name is not None:
                     print(f"[register_or_update_user] updating organization for {telegram_id} from '{user.organization_name}' to '{organization_name}'")
                     user.organization_name = organization_name
+                    await session.commit()
                 print(f"[register_or_update_user] updating user {telegram_id}")
             else:
                 # Создаем нового
