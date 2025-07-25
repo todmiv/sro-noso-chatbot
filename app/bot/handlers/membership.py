@@ -1,3 +1,4 @@
+import logging
 from aiogram import Router, types
 from aiogram.filters import Command
 
@@ -11,17 +12,22 @@ router = Router()
 @router.message(Command(commands=['membership']))
 async def cmd_membership(message: types.Message) -> None:
     """Показывает информацию о членстве в СРО."""
-    print(f"[cmd_membership] Received command from {message.from_user.id}")
-    print(f"Raw text: '{message.text}'")
-    print(f"Entities: {message.entities}")
+    logger = logging.getLogger(__name__)
+    logger.info(f"Processing /membership command from user {message.from_user.id}")
     
-    user_service = UserService()
-    user = await user_service.get_user_by_telegram_id(message.from_user.id)
-    
-    if not user:
-        await message.answer(
-            "❌ Пользователь не найден. Выполните команду /start для регистрации."
-        )
+    try:
+        user_service = UserService()
+        user = await user_service.get_user_by_telegram_id(message.from_user.id)
+        
+        if not user:
+            logger.warning(f"User {message.from_user.id} not found")
+            await message.answer(
+                "❌ Пользователь не найден. Выполните команду /start для регистрации."
+            )
+            return
+    except Exception as e:
+        logger.error(f"Error getting user {message.from_user.id}: {str(e)}")
+        await message.answer("❌ Ошибка при получении данных пользователя. Попробуйте позже.")
         return
     
     if user.is_member:
@@ -57,13 +63,30 @@ async def cmd_membership(message: types.Message) -> None:
 @router.callback_query(lambda c: c.data == "check_membership")
 async def check_membership_status(callback: types.CallbackQuery) -> None:
     """Проверяет статус членства в реестре СРО."""
-    user_service = UserService()
-    user = await user_service.get_user_by_telegram_id(callback.from_user.id)
+    logger = logging.getLogger(__name__)
     
-    if not user or not user.organization_name:
-        await callback.message.answer(
-            "❌ Для проверки членства необходимо указать название организации в профиле."
-        )
+    try:
+        user_service = UserService()
+        user = await user_service.get_user_by_telegram_id(callback.from_user.id)
+        
+        if not user:
+            logger.warning(f"User {callback.from_user.id} not found")
+            await callback.message.answer(
+                "❌ Пользователь не найден. Выполните команду /start для регистрации."
+            )
+            await callback.answer()
+            return
+            
+        if not user.organization_name:
+            logger.warning(f"User {callback.from_user.id} has no organization set")
+            await callback.message.answer(
+                "❌ Для проверки членства необходимо указать название организации в профиле."
+            )
+            await callback.answer()
+            return
+    except Exception as e:
+        logger.error(f"Error getting user {callback.from_user.id}: {str(e)}")
+        await callback.message.answer("❌ Ошибка при получении данных пользователя. Попробуйте позже.")
         await callback.answer()
         return
     
