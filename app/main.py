@@ -3,6 +3,9 @@ import logging
 import signal
 import sys
 from pathlib import Path
+from fastapi import APIRouter, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from aioredis import Redis
 
 # Добавляем путь к проекту
 sys.path.append(str(Path(__file__).parent.parent))
@@ -19,10 +22,51 @@ from app.database.connection import (
     init_database, 
     init_redis, 
     close_database, 
-    close_redis
+    close_redis,
+    get_redis
 )
 from app.utils.logging_config import setup_logging
-from app.monitoring.metrics import setup_metrics
+from app.monitoring.metrics import setup_metrics, SERVICE_HEALTH
+
+# Health check router
+health_router = APIRouter()
+
+@health_router.get("/health")
+async def health_check():
+    """Endpoint для проверки состояния сервиса."""
+    db_status = await check_db_connection()
+    redis_status = await check_redis_connection()
+    
+    # Обновляем метрики
+    SERVICE_HEALTH.labels(service="database").set(1 if db_status else 0)
+    SERVICE_HEALTH.labels(service="redis").set(1 if redis_status else 0)
+    
+    return {
+        "status": "OK", 
+        "services": {
+            "database": db_status,
+            "redis": redis_status
+        }
+    }
+
+async def check_db_connection() -> bool:
+    """Проверка подключения к базе данных."""
+    try:
+        async with AsyncSession() as session:
+            await session.execute("SELECT 1")
+        return True
+    except Exception as e:
+        logging.error(f"Database connection error: {e}")
+        return False
+
+async def check_redis_connection() -> bool:
+    """Проверка подключения к Redis."""
+    try:
+        redis: Redis = await get_redis()
+        return await redis.ping()
+    except Exception as e:
+        logging.error(f"Redis connection error: {e}")
+        return False
 
 logger = logging.getLogger(__name__)
 
@@ -58,27 +102,38 @@ async def startup_sequence():
     global bot, dispatcher
     
     logger.info("Starting SRO NOSO Chat-Bot...")
+    logger.debug(f"Python version: {sys.version}")
+    logger.debug(f"Running in {'production' if config.is_production else 'development'} mode")
     
     # 1. Настройка логирования
     setup_logging()
+    logger.debug("Logging configured")
     
     # 2. Инициализация Redis
+    logger.debug("Initializing Redis connection...")
     await init_redis()
+    logger.info("Redis connection established")
     
     # 3. Инициализация базы данных
+    logger.debug("Initializing database connection...")
     await init_database()
+    logger.info("Database connection established")
     
     # 4. Создание бота и диспетчера
     # bot и dispatcher уже созданы глобально и роутеры зарегистрированы
+    logger.debug(f"Bot token: {config.bot.token[:5]}...")
+    logger.debug(f"Registered handlers: {len(dispatcher.sub_routers)}")
     
     # 5. Инициализация AI сервисов
     from app.services.global_services import services
     logger.info("Initializing AI services...")
     _ = services.rag_system  # Инициализация RAG системы
+    logger.debug(f"AI services: {services.__dict__.keys()}")
     logger.info("AI services initialized")
     
     # 6. Настройка мониторинга
     setup_metrics()
+    logger.debug("Metrics system initialized")
     
     logger.info("Startup sequence completed successfully")
 
