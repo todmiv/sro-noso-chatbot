@@ -26,6 +26,11 @@ async def cmd_profile(message: types.Message, state: FSMContext) -> None:
         )
         return
     
+    if not user.organization_name:
+        await state.set_state(ProfileStates.editing_organization)
+        await message.answer("🏢 Введите название вашей организации:")
+        return
+    
     profile_text = (
         f"👤 **Ваш профиль:**\n\n"
         f"**Имя:** {user.first_name or 'Не указано'}\n"
@@ -55,6 +60,10 @@ async def edit_organization(callback: types.CallbackQuery, state: FSMContext) ->
 
 @router.message(ProfileStates.editing_organization)
 async def save_organization(message: types.Message, state: FSMContext) -> None:
+    if message.text.startswith('/'):
+        print(f"[save_organization] Command received: {message.text}, clearing state")
+        await state.clear()  # Сбрасываем состояние
+        return  # Позволяем команде обработаться нормально
     """Сохраняет новое название организации."""
     current_state = await state.get_state()
     print(f"[save_organization] State: {current_state}, Received text: '{message.text}'")
