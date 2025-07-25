@@ -1,5 +1,5 @@
 """Регистрация всех обработчиков команд."""
-from aiogram import Dispatcher
+from aiogram import Dispatcher, F
 
 from .start import router as start_router
 from .help import router as help_router
@@ -30,3 +30,17 @@ def register_handlers(dp: Dispatcher) -> None:
     dp.include_router(secret_router)
     print("[REGISTER] error_router")
     dp.include_router(error_router)
+    
+    # Фильтрация чатов
+    for router in [
+        start_router,
+        help_router,
+        documents_router,
+        consultation_router,
+        profile_router,
+        membership_router,
+        secret_router,
+        error_router
+    ]:
+        router.message.filter(F.chat.type == "private")
+        router.callback_query.filter(F.message.chat.type == "private")
