@@ -17,12 +17,17 @@ class UserRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def add(self, user: User) -> None:
+    async def add(self, user: User) -> User:
         self._session.add(user)
         await self._session.commit()
+        await self._session.refresh(user)
+        return user
 
-    async def update(self, user: User) -> None:
+    async def update(self, user: User) -> User:
+        merged_user = await self._session.merge(user)
         await self._session.commit()
+        await self._session.refresh(merged_user)
+        return merged_user
 
     async def get_all_users(self) -> list[User]:
         stmt = select(User)
