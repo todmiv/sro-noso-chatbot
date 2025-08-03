@@ -33,8 +33,8 @@ async def error_handler(event: ErrorEvent) -> None:
     
     # Сохраняем ошибку в базу данных
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
@@ -85,8 +85,8 @@ async def value_error_handler(event: ErrorEvent) -> None:
     logger.warning(f"Validation error: {event.exception}\nFull traceback:\n{error_traceback}")
     
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
@@ -118,8 +118,8 @@ async def permission_error_handler(event: ErrorEvent) -> None:
     logger.warning(f"Permission error: {event.exception}\nFull traceback:\n{error_traceback}")
     
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
@@ -152,8 +152,8 @@ async def timeout_error_handler(event: ErrorEvent) -> None:
     logger.warning(f"Timeout error: {event.exception}\nFull traceback:\n{error_traceback}")
     
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
@@ -190,8 +190,8 @@ async def connection_error_handler(event: ErrorEvent) -> None:
     )
     
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
@@ -228,8 +228,8 @@ async def database_error_handler(event: ErrorEvent) -> None:
     )
     
     try:
-        error_repo = ErrorRepository()
-        await error_repo.create_error_log(
+        async with ErrorRepository() as error_repo:
+            await error_repo.create_error_log(
             error_type=event.exception.__class__.__name__,
             error_message=str(event.exception),
             traceback=error_traceback,
