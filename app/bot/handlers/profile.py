@@ -31,11 +31,14 @@ async def cmd_profile(message: types.Message, state: FSMContext) -> None:
         )
         return
     
+    logger.debug(f"Current organization for user {message.from_user.id}: '{user.organization_name}'")
     if not user.organization_name:
-        logger.debug(f"Requesting organization for user {message.from_user.id}")
+        logger.debug(f"Organization missing for user {message.from_user.id}, requesting input")
         await state.set_state(ProfileStates.editing_organization)
         await message.answer("🏢 Введите название вашей организации:")
         return
+    else:
+        logger.debug(f"User {message.from_user.id} already has organization: '{user.organization_name}'")
     
     logger.debug(f"Showing profile for user {message.from_user.id}")
     profile_text = (
@@ -111,13 +114,11 @@ async def save_organization(message: types.Message, state: FSMContext) -> None:
     user_service = UserService()
     try:
         logger.debug(f"Attempting to save organization '{org_name}' for user {message.from_user.id}")
-        # Получаем текущего пользователя до обновления
         user_before = await user_service.get_user_by_telegram_id(message.from_user.id)
         logger.debug(f"User before update: {user_before.organization_name if user_before else 'None'}")
         
-        # Добавляем подробное логирование
         logger.info(f"Saving organization for user {message.from_user.id}")
-        success = await user_service.register_or_update_user(
+        updated_user = await user_service.register_or_update_user(
             telegram_id=message.from_user.id,
             username=message.from_user.username,
             first_name=message.from_user.first_name,
@@ -125,23 +126,30 @@ async def save_organization(message: types.Message, state: FSMContext) -> None:
             organization_name=org_name
         )
         
-        if not success:
+        if not updated_user or updated_user.organization_name != org_name:
             logger.error(f"Failed to update organization for user {message.from_user.id}")
             await message.answer("❌ Ошибка при сохранении организации. Попробуйте позже.")
             return
             
         logger.info(f"Successfully updated organization for user {message.from_user.id} to: '{org_name}'")
-        # Проверяем сохранение в БД
-        user_after = await user_service.get_user_by_telegram_id(message.from_user.id)
-        logger.info(f"User after update - org: {user_after.organization_name if user_after else 'None'}, id: {user_after.id if user_after else 'None'}")
-        
-        # Явно очищаем состояние
         await state.clear()
         logger.info(f"State cleared for user {message.from_user.id}")
+        
+        # Показываем обновленный профиль
+        profile_text = (
+            f"👤 **Ваш профиль:**\n\n"
+            f"**Имя:** {updated_user.first_name or 'Не указано'}\n"
+            f"**Фамилия:** {updated_user.last_name or 'Не указано'}\n"
+            f"**Username:** @{updated_user.username or 'Не указано'}\n"
+            f"**Организация:** `{updated_user.organization_name or 'Не указано'}`\n"
+            f"**Статус членства:** {'✅ Член СРО' if updated_user.is_member else '❌ Не является членом'}"
+        )
+        await message.answer(profile_text, parse_mode="Markdown")
+        
     except Exception as e:
         logger.error(f"Error updating organization for user {message.from_user.id}: {str(e)}")
         await message.answer("❌ Произошла ошибка при сохранении. Попробуйте позже.")
-    await state.clear()
+        await state.clear()
 
 
 @router.callback_query(lambda c: c.data == "cancel_edit")
