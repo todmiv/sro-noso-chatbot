@@ -42,6 +42,7 @@ class UserService:
                 print(f"[register_or_update_user] updating user {telegram_id}")
                 await session.commit()
                 await session.refresh(user)
+                print(f"[register_or_update_user] after commit - org: '{user.organization_name}'")
             else:
                 # Создаем нового
                 user = User(
@@ -52,13 +53,15 @@ class UserService:
                     organization_name=organization_name
                 )
                 print(f"[register_or_update_user] creating new user {telegram_id} with organization: '{organization_name}'")
-            if user.id:  # Если пользователь существует
-                await user_repo.update(user)
-                print(f"[register_or_update_user] user updated {telegram_id}")
-            else:  # Новый пользователь
                 await user_repo.add(user)
-                print(f"[register_or_update_user] user added {telegram_id}")
-            return user
+                await session.commit()
+                await session.refresh(user)
+                print(f"[register_or_update_user] new user committed - org: '{user.organization_name}'")
+            
+            # Дополнительная проверка после коммита
+            verified_user = await user_repo.get_by_telegram_id(telegram_id)
+            print(f"[register_or_update_user] verified org: '{verified_user.organization_name if verified_user else None}'")
+            return verified_user if verified_user else user
     
     async def get_user_by_telegram_id(self, telegram_id: int) -> Optional[User]:
         """Получает пользователя по Telegram ID."""
