@@ -1,3 +1,20 @@
+"""
+Основной модуль приложения SRO NOSO Chat-Bot.
+
+Этот модуль отвечает за:
+- Инициализацию всех компонентов системы
+- Запуск и остановку сервера
+- Обработку сигналов graceful shutdown
+- Настройку маршрутов API
+- Интеграцию с Telegram Bot API
+
+Архитектура:
+- FastAPI для HTTP API и health checks
+- Aiogram 3 для Telegram бота
+- Асинхронная обработка всех операций
+- Graceful shutdown с сохранением состояния
+"""
+
 import asyncio
 import logging
 import signal
@@ -7,7 +24,7 @@ from fastapi import APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from aioredis import Redis
 
-# Добавляем путь к проекту
+# Добавляем путь к проекту для корректного импорта модулей
 sys.path.append(str(Path(__file__).parent.parent))
 
 from aiogram.filters import Command
@@ -19,9 +36,9 @@ from app.bot.bot_instance import create_bot, create_dispatcher
 from app.bot.handlers import register_handlers
 from app.bot.middleware import register_middleware
 from app.database.connection import (
-    init_database, 
-    init_redis, 
-    close_database, 
+    init_database,
+    init_redis,
+    close_database,
     close_redis,
     get_redis
 )

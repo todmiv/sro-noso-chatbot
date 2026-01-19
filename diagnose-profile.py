@@ -17,7 +17,7 @@ async def diagnose_profile_issue():
     try:
         # Проверка 1: Импорт UserService
         print("\n1. Проверка импорта UserService...")
-        from app.services.userservice import UserService
+        from app.services.user_service import UserService
         print("✅ UserService успешно импортирован")
         
         # Проверка 2: Сигнатура метода register_or_update_user
